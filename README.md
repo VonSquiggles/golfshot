@@ -20,6 +20,10 @@ Assumptions:
 https://www.researchgate.net/publication/323372659_Aerodynamics_of_Golf_Balls_in_Still_Air
     
 # Getting Started
+Install the package using pip
+```
+pip install golfshot
+```
 
 ## Basic Example
 ```
