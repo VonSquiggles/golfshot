@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import pandas as pd
 #TODO:
 # warnings about bounds on velocity, angle, rotation rate
 
@@ -59,14 +60,14 @@ class GolfShot:
                 0]
 
         # only initial acceleration is gravity
-        accel0 = [0, g, 0]
+        accel0 = [0, -g, 0]
 
         # combine acceleration, velocity, and position into state array
         state = np.array([[pos0, vel0, accel0]])
 
         # parameters for executing the simulation
-        sim_time = 100 # 100s should be more than plenty of time
-        steps = 10000 # number of steps in the simulation
+        sim_time = 15 # 100s should be more than plenty of time
+        steps = 30000 # number of steps in the simulation
         delta_t = sim_time/steps # change in time between each sim step
         time = np.linspace(0, sim_time, num=steps) # time vector for sim
 
@@ -79,7 +80,7 @@ class GolfShot:
             Re = V*D/kin_visc
 
             # Compute drag coefficient based on reynolds numbers. Diff equations for high and low speeds
-            if V <= 32:
+            if Re < 10**5:
                 c_D = 1.29*10**-10*Re**2 - 2.59*10**-5*Re + 1.50   
             else:
                 c_D = 1.91*10**-11*Re**2 - 5.40*10**-6*Re + 0.56 
@@ -107,13 +108,13 @@ class GolfShot:
             a_z = 0
 
             # compute velocity in each axis
-            v_x = state[-1,1,0] + a_x*delta_t
-            v_y = state[-1,1,1] + a_y*delta_t
+            v_x = state[-1,1,0] + state[-1,2,0]*delta_t
+            v_y = state[-1,1,1] + state[-1,2,1]*delta_t
             v_z = 0
 
             # compute position
-            x = state[-1,0,0] + v_x*delta_t
-            y = state[-1,0,1] + v_y*delta_t
+            x = state[-1,0,0] + state[-1,1,0]*delta_t
+            y = state[-1,0,1] + state[-1,1,1]*delta_t
             z = 0
             
             # consolidate state array and append to previous states
@@ -122,9 +123,23 @@ class GolfShot:
             # if the height of the ball drops below 0 on the y axis, we know the ball has hit the ground
             if y < 0:
                 break
-        
-        # pull out x and y states for 2D sim
-        pos_x = (state[:,0,0]*meters_to_yards_coeff).tolist()
-        pos_y = (state[:,0,1]*meters_to_yards_coeff).tolist()
 
-        return [pos_x, pos_y] # return 2D state
+        # pull out x and y states for 2D sim
+        # pos_x = (state[:,0,0]*meters_to_yards_coeff).tolist()
+        # pos_y = (state[:,0,1]*meters_to_yards_coeff).tolist()
+        pos_x = (state[:,0,0]).tolist()
+        pos_y = (state[:,0,1]).tolist()
+
+        time = time[0:len(pos_x)]
+
+        # Create pandas timeseries dataframe
+        np_2d_timeseries = np.array([time, pos_x, pos_y])
+        pd_2d_timeseries = pd.DataFrame(np_2d_timeseries.T, columns=['time','x','y'])
+
+        # return pandas timeseries dataframe
+        return pd_2d_timeseries
+    
+if __name__ == '__main__':
+    sim = GolfShot(launch_velocity=59,launch_angle=12.6,rotation_rate=342)
+    state_history = sim.run_sim()
+    print(state_history)

@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='golfshot',
-    version='0.1.0',
+    version='1.0.0',
     packages=['golfshot'],
     license='MIT',
     author='Andrew Van Gerpen',

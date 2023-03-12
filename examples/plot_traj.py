@@ -1,5 +1,4 @@
 import plotly.express as px
-import pandas as pd
 from golfshot import GolfShot
 
 # coefficients for converting units of intial states
@@ -19,8 +18,8 @@ sim = GolfShot(launch_velocity=launch_vel_mps,
                 rotation_rate=rotation_rate_rps)
 vals = sim.run_sim()
 
-df = pd.DataFrame(dict(x=vals[0], y=vals[1])) # create data fram for plotting
-fig = px.line(  df, x="x", y="y",
-                labels={"x": "Distance (yards)", "y": "Height (yards)",},
-                title=f'Golf Shot; launch velocity: {launch_vel_mph} (mph)') # plot
+# df = pd.DataFrame(dict(x=vals[0], y=vals[1])) # create data fram for plotting
+fig = px.line(  vals, x="x", y="y",
+                labels={"x": "Distance (meters)", "y": "Height (meters)",},
+                title=f'Golf Shot; launch velocity: {launch_vel_mph} (miles per hour)') # plot
 fig.show() # show figure in default browser
